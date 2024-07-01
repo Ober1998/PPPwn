@@ -331,8 +331,7 @@ struct sys_kexec_args {
 };
 
 static int sys_kexec(struct thread * td, struct sys_kexec_args * uap) {
-  return uap->arg ? uap->fptr(td, uap->arg) : uap->fptr(td);
-
+  return uap->fptr(td, uap);
 }
 
 void stage2(void) {
