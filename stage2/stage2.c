@@ -334,6 +334,47 @@ static int sys_kexec(struct thread * td, struct sys_kexec_args * uap) {
   return uap->fptr(td, uap);
 }
 
+struct filedesc {
+    void *useless1[3];
+        void *fd_rdir;
+        void *fd_jdir;
+};
+
+void* sys_jailbreak(struct thread *td) {
+
+    struct ucred* cred = td -> td_proc -> p_ucred;
+    struct filedesc* fd = td -> td_proc -> p_fd;
+
+    void *td_ucred = *(void **)(((char *)td) + 304); // p_ucred == td_ucred
+
+
+    void* kbase = (void*)(rdmsr(MSR_LSTAR) - 0x1C0);
+    uint8_t* kernel_ptr = (uint8_t*)kbase;
+    void** got_prison0 =   (void**)&kernel_ptr[PRISON0_addr];
+    void** got_rootvnode = (void**)&kernel_ptr[ROOTVNODE_addr];
+ 
+    cred->cr_uid = 0;
+    cred->cr_ruid = 0;
+    cred->cr_rgid = 0;
+    cred->cr_groups[0] = 0;
+    cred->cr_prison = *got_prison0;
+    fd -> fd_rdir = fd -> fd_jdir = *got_rootvnode;
+ 
+    // sceSblACMgrIsSystemUcred
+    uint64_t *sonyCred = (uint64_t *)(((char *)td_ucred) + 96);
+    *sonyCred = 0xFFFFFFFFFFFFFFFFULL;
+
+    // sceSblACMgrGetDeviceAccessType
+    uint64_t *sceProcType = (uint64_t *)(((char *)td_ucred) + 88);
+    *sceProcType = 0x3801000000000013; // Max access
+
+    // sceSblACMgrHasSceProcessCapability
+    uint64_t *sceProcCap = (uint64_t *)(((char *)td_ucred) + 104);
+    *sceProcCap = 0xFFFFFFFFFFFFFFFFULL; // Sce Process
+
+    return 0;
+}
+
 void stage2(void) {
 
   // Use "kmem" for all patches
@@ -534,6 +575,11 @@ void stage2(void) {
   struct sysent * sys = & sysents[SYS_kexec];
   sys -> sy_narg = 2;
   sys -> sy_call = (void * ) sys_kexec;
+  sys -> sy_thrcnt = 1;
+
+  sys = &sysents[9];
+  sys -> sy_narg = 2;
+  sys -> sy_call = (void * ) sys_jailbreak;//sys_rejail
   sys -> sy_thrcnt = 1;
 
   printf("kexec added\n");
