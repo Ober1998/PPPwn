@@ -471,7 +471,8 @@ void stage2(void) {
 	kmem[0] = 0x40;
 #endif
 
-#if FIRMWARE == 1050
+#if FIRMWARE == 1050 || FIRMWARE == 1070 || FIRMWARE == 1071
+// Dynlib patches needed to run payloads above 9.00
   kmem = (uint8_t *)&kbase[0x213013];
   kmem[0] = 0x90;
   kmem[1] = 0x90;
