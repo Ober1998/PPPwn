@@ -33,6 +33,39 @@
 #define kdlsym_addr_copyinstr_patch2 0xffffffff8222f73f
 #define kdlsym_addr_copyinstr_patch3 0xffffffff8222f770
 
+// libkernel_sys.srpx
+#define _scePthreadAttrInit_offset 0x154d0
+#define _scePthreadAttrSetstacksize_offset 0x15600
+#define _scePthreadCreate_offset 0x30130
+#define _thr_initial_offset 0x8D830
+
+#define vm_map_protect_p 0x00264C08
+#define ptrace_p 0x448D5
+#define ptrace_p2 0x44DAF
+#define disable_aslr_p 0xC1F4A
+#define sceSblACMgrIsAllowedSystemLevelDebugging_p 0x432D26
+#define kemem_2 0x1171C5
+#define kemem_1 0x1171BE
+#define vm_map_lock_offset 0x25FA50
+#define vm_map_insert_offset 0x260D60
+#define vm_map_unlock_offset 0x25FAB0
+#define malloc_offset 0x00301840
+#define free_offset 0x00301A40
+#define vm_map_lock_read_offset 0x0025FB90
+#define vm_map_unlock_read_offset 0x0025FBE0
+#define vm_map_lookup_entry_offset 0x00260190
+#define M_TEMP_offset 0x01A7AE50
+#define proc_rmem_offset 0x43E80
+#define vm_map_findspace_offset 0x262CC0
+#define vm_map_delete_offset 0x262700
+#define create_thread_offset 0x842E0
+#define all_proc_offset 0x1B48318
+#define sys_dynlib_dlsym_p 0x0009547B
+#define sys_dynlib_dlsym_p2 0x002F2C20
+
+#define PRISON0_addr 0x00113E398
+#define ROOTVNODE_addr 0x0022C5750
+
 #elif (FIRMWARE == 750 || FIRMWARE == 751 || FIRMWARE == 755) // FW 7.50 / FW 7.51 / FW 7.55
 
 /* kernel offsets */
@@ -921,6 +954,8 @@
 #define sceSblAuthMgrIsLoadable 0x00157F91
 #define depth_patch 0x0028FF26
 #endif
+
+
 
 #else
 
