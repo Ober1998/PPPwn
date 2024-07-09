@@ -39,12 +39,12 @@
 #define _scePthreadCreate_offset 0x30130
 #define _thr_initial_offset 0x8D830
 
-#define vm_map_protect_p 0x00264C08
+#define vm_map_protect_p 0x36b05b
 #define ptrace_p 0x448D5
 #define ptrace_p2 0x44DAF
 #define disable_aslr_p 0xC1F4A
 #define sceSblACMgrIsAllowedSystemLevelDebugging_p 0x432D26
-#define kemem_2 0x1171C5
+#define kemem_2 0x1171C4
 #define kemem_1 0x1171BE
 #define vm_map_lock_offset 0x25FA50
 #define vm_map_insert_offset 0x260D60
@@ -57,7 +57,7 @@
 #define M_TEMP_offset 0x01A7AE50
 #define proc_rmem_offset 0x43E80
 #define vm_map_findspace_offset 0x262CC0
-#define vm_map_delete_offset 0x262700
+#define vm_map_delete_offset 0x260bd0
 #define create_thread_offset 0x842E0
 #define all_proc_offset 0x1B48318
 #define sys_dynlib_dlsym_p 0x0009547B
@@ -121,7 +121,7 @@
 #define _thr_initial_offset 0x8D830
 
 #define vm_map_protect_p 0x3014c8
-#define ptrace_p 0x361cf5
+#define ptrace_p 0x361cf4
 #define ptrace_p2 0x3621cf
 #define disable_aslr_p 0x218aa2
 #define sceSblACMgrIsAllowedSystemLevelDebugging_p 0x44e220
