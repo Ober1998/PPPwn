@@ -367,14 +367,14 @@ void* sys_jailbreak(struct thread *td) {
     uint8_t* kernel_ptr = (uint8_t*)kbase;
     void** got_prison0 =   (void**)&kernel_ptr[PRISON0_addr];
     void** got_rootvnode = (void**)&kernel_ptr[ROOTVNODE_addr];
- 
+
     cred->cr_uid = 0;
     cred->cr_ruid = 0;
     cred->cr_rgid = 0;
     cred->cr_groups[0] = 0;
     cred->cr_prison = *got_prison0;
     fd -> fd_rdir = fd -> fd_jdir = *got_rootvnode;
- 
+
     // sceSblACMgrIsSystemUcred
     uint64_t *sonyCred = (uint64_t *)(((char *)td_ucred) + 96);
     *sonyCred = 0xFFFFFFFFFFFFFFFFULL;
@@ -388,6 +388,21 @@ void* sys_jailbreak(struct thread *td) {
     *sceProcCap = 0xFFFFFFFFFFFFFFFFULL; // Sce Process
 
     return 0;
+}
+
+u_int64_t vmap_insert(struct vm_map *map, size_t size) {
+  uint8_t * kbase = (uint8_t * )(rdmsr(0xC0000082) - 0x1C0);
+  int (*vm_map_insert)(struct vm_map *map, struct vm_object *object,
+                       vm_ooffset_t offset, vm_offset_t start, vm_offset_t end,
+                       vm_prot_t prot, vm_prot_t max, int cow) =
+      (void *)(kbase + vm_map_insert_offset);
+
+  for (int i = 0; i < 50; i++) {
+    if (!vm_map_insert(map, NULL, 0, PAYLOAD_BASE + (i * size), PAYLOAD_BASE + (i * size) + size, VM_PROT_ALL, VM_PROT_ALL, 0)) {
+      return PAYLOAD_BASE + (i * size);
+    }
+  }
+  return 0;
 }
 
 void stage2(void) {
@@ -544,7 +559,7 @@ void stage2(void) {
 	kmem[2] = 0x00;
 	kmem[3] = 0x00;
 #endif
-#if FIRMWARE == 960 
+#if FIRMWARE == 960
 	// Patch debug setting errors
 	kmem = (uint8_t *)&kbase[0x004e9038];
 	kmem[0] = 0x00;
@@ -619,6 +634,7 @@ void stage2(void) {
   struct vmspace * vm;
   struct vm_map * map;
   int r;
+  u_int64_t payload_addr;
   int( * vm_map_insert)(struct vm_map * map, struct vm_object * object,
       vm_ooffset_t offset, vm_offset_t start, vm_offset_t end,
       vm_prot_t prot, vm_prot_t max, int cow) =
@@ -649,7 +665,7 @@ return;
 
 #ifdef USB_LOADER
 #define EEXIST 17
-static const int PAYLOAD_SZ = 0x400000;
+static const int PAYLOAD_SZ = 0x80000;
 
 
 // Function pointers and variables as per your environment
@@ -741,13 +757,13 @@ printf("payload_size: %d\n", payload_size);
 
   // allocate some memory.
   vm_map_lock(map);
-  r = vm_map_insert(map, NULL, NULL, PAYLOAD_BASE, PAYLOAD_BASE + 0x400000, VM_PROT_ALL, VM_PROT_ALL, 0);
+  payload_addr = vmap_insert(map, 0x80000);
   vm_map_unlock(map);
   if (r) {
     printf("failed to allocate payload memory!\n");
     return;
   }
-  printf("Allocated payload memory @ 0x%016lx\n", PAYLOAD_BASE);
+  printf("Allocated payload memory @ 0x%016lx\n", payload_addr);
   printf("Writing payload...\n");
   // write the payload
   #ifdef USB_LOADER
@@ -757,7 +773,7 @@ printf("payload_size: %d\n", payload_size);
 
     int (*proc_rwmem)(struct proc *p, struct uio *uio) = (void *)(kbase + proc_rmem_offset);
 
-    if(payload_size >= 0x400000){
+    if(payload_size >= PAYLOAD_SZ){
         printf("Size %d too big\n", payload_size);
         return;
     }
@@ -769,7 +785,7 @@ printf("payload_size: %d\n", payload_size);
     memset(&uio, NULL, sizeof(uio));
     uio.uio_iov = (uint64_t)&iov;
     uio.uio_iovcnt = 1;
-    uio.uio_offset = (uint64_t)PAYLOAD_BASE;
+    uio.uio_offset = (uint64_t)payload_addr;
     uio.uio_resid = payload_size;
     uio.uio_segflg = UIO_SYSSPACE;
     uio.uio_rw =  UIO_WRITE;
@@ -779,7 +795,7 @@ printf("payload_size: %d\n", payload_size);
     r = proc_rwmem(p, &uio);
 
   #else
-  r = proc_write_mem(td, kbase, p, (void * ) PAYLOAD_BASE, payloadbin_size, payloadbin, NULL);
+  r = proc_write_mem(td, kbase, p, (void * ) payload_addr, payloadbin_size, payloadbin, NULL);
   #endif
   if (r) {
     printf("failed to write payload!\n");
@@ -788,7 +804,7 @@ printf("payload_size: %d\n", payload_size);
   printf("Wrote payload!\n");
   printf("Creating ShellCore payload thread...\n");
   // create a thread
-  r = proc_create_thread(td, kbase, p, PAYLOAD_BASE);
+  r = proc_create_thread(td, kbase, p, payload_addr);
   if (r) {
     printf("failed to create payload thread!\n");
     return;
