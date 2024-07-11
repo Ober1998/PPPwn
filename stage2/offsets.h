@@ -33,18 +33,27 @@
 #define kdlsym_addr_copyinstr_patch2 0xffffffff8222f73f
 #define kdlsym_addr_copyinstr_patch3 0xffffffff8222f770
 
+#if FIRMWARE == 700
 // libkernel_sys.srpx
-#define _scePthreadAttrInit_offset 0x154d0
-#define _scePthreadAttrSetstacksize_offset 0x15600
-#define _scePthreadCreate_offset 0x30130
+#define _scePthreadAttrInit_offset 0x14160
+#define _scePthreadAttrSetstacksize_offset 0x14180
+#define _scePthreadCreate_offset 0x145a0
 #define _thr_initial_offset 0x8D830
+#else // 701 702
+// libkernel_sys.srpx
+#define _scePthreadAttrInit_offset 0x14210
+#define _scePthreadAttrSetstacksize_offset 0x14230
+#define _scePthreadCreate_offset 0x14650
+#define _thr_initial_offset 0x8D830
+#endif
 
-#define vm_map_protect_p 0x36b05b
+
+#define vm_map_protect_p 0x264C08
 #define ptrace_p 0x448D5
 #define ptrace_p2 0x44DAF
 #define disable_aslr_p 0xC1F4A
 #define sceSblACMgrIsAllowedSystemLevelDebugging_p 0x432D26
-#define kemem_2 0x1171C4
+#define kemem_2 0x1171C6
 #define kemem_1 0x1171BE
 #define vm_map_lock_offset 0x25FA50
 #define vm_map_insert_offset 0x260D60
@@ -57,7 +66,7 @@
 #define M_TEMP_offset 0x01A7AE50
 #define proc_rmem_offset 0x43E80
 #define vm_map_findspace_offset 0x262CC0
-#define vm_map_delete_offset 0x260bd0
+#define vm_map_delete_offset 0x262700
 #define create_thread_offset 0x842E0
 #define all_proc_offset 0x1B48318
 #define sys_dynlib_dlsym_p 0x0009547B
@@ -115,13 +124,13 @@
 #endif
 
 // libkernel_sys.srpx
-#define _scePthreadAttrInit_offset 0x15420
-#define _scePthreadAttrSetstacksize_offset 0x15550
-#define _scePthreadCreate_offset 0x30180
+#define _scePthreadAttrInit_offset 0x14160
+#define _scePthreadAttrSetstacksize_offset 0x14180
+#define _scePthreadCreate_offset 0x145a0
 #define _thr_initial_offset 0x8D830
 
 #define vm_map_protect_p 0x3014c8
-#define ptrace_p 0x361cf4
+#define ptrace_p 0x361cf5
 #define ptrace_p2 0x3621cf
 #define disable_aslr_p 0x218aa2
 #define sceSblACMgrIsAllowedSystemLevelDebugging_p 0x44e220
