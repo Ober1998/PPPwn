@@ -717,7 +717,7 @@ if (fd >= 0) {
         return;
     }
 
-    printf("Copied payload from USB to internal storage\n");
+    memcpy( & notify.message, "PPPwned: Payload Transferred To Internal Storage", 49);
     ksys_close(td, fd); // Close internal storage file after writing
 }
 
